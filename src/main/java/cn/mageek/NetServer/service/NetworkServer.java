@@ -1,6 +1,7 @@
 package cn.mageek.NetServer.service;
 
 import cn.mageek.NetServer.handler.receiveMsgHandler;
+import cn.mageek.NetServer.handler.sendMsgHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -44,8 +45,15 @@ public class NetworkServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
+                            // out 必须放在最后一个 in 前面，也就是必须是以 in 结尾。逻辑是in 顺序执行完毕以后从 pipeline 反向查找 out
                             ChannelPipeline p = ch.pipeline();
+
+                            // out 执行顺序为注册顺序的逆序
+                            p.addLast(new sendMsgHandler());
+
+                            // in 执行顺序为注册顺序
                             p.addLast(new receiveMsgHandler());
+
                         }
                     });
 
