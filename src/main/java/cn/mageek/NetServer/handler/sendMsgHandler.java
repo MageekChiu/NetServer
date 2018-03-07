@@ -39,7 +39,7 @@ public class sendMsgHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("sendMsg error:{} ,from: {}",cause.getMessage(),ctx.channel().remoteAddress());
+        logger.error("sendMsg error:{} ,from: {}",cause.getMessage(),ctx.channel().remoteAddress());//ReadTimeoutException 会出现在这里，亦即事件会传递到handler链中最后一个事件处理中
         cause.printStackTrace();
         ctx.close();//这时一般就会自动关闭连接了。手动关闭的目的是避免偶尔情况下会处于未知状态
     }

@@ -9,6 +9,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,7 @@ public class NetworkServer {
                         public void initChannel(SocketChannel ch) throws Exception {
                             // out 必须放在最后一个 in 前面，也就是必须是以 in 结尾。逻辑是in 顺序执行完毕以后从 pipeline 反向查找 out
                             ChannelPipeline p = ch.pipeline();
+                            p.addLast(new ReadTimeoutHandler(5));//5秒超时
 
                             // out 执行顺序为注册顺序的逆序
                             p.addLast(new sendMsgHandler());
@@ -57,9 +59,23 @@ public class NetworkServer {
                         }
                     });
 
-            // Start the server.
+            // Start the server. 采用同步等待的方式
             ChannelFuture f = b.bind(Integer.parseInt(port)).sync();
             logger.info("NetWorkServer is up now and listens on {}", f.channel().localAddress());
+
+            // Start the server. 采用异步回调的方式
+//            ChannelFuture f = b.bind(Integer.parseInt(port));
+//            f.addListener(new ChannelFutureListener() {
+//                public void operationComplete(ChannelFuture channelFuture) throws Exception {
+//                    if (channelFuture.isSuccess()){
+//                        logger.info("NetWorkServer is up now and listens on {}",channelFuture.channel().localAddress());
+//                    }else {
+//                        logger.error("NetWorkServer start error: {}",channelFuture.cause().getMessage());
+//                        channelFuture.cause().printStackTrace();
+//                    }
+//                }
+//            });
+
 
             // Wait until the server socket is closed.
             f.channel().closeFuture().sync();
