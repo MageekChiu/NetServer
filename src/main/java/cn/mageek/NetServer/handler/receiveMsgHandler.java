@@ -38,7 +38,7 @@ public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
         ByteBuf buf  = (ByteBuf) msg;
         try {
             logger.info("receiveMsg: {} ,from: {}",buf.toString(CharsetUtil.UTF_8),ctx.channel().remoteAddress());
-//            ctx.write(buf); // 写入缓冲区
+//            ctx.write(buf); // 写入缓冲区，write操作可以把把数据直接传递给OutBoundHandler
 //            ctx.flush(); // 将缓冲区发送给客户端
 
 //            logger.info("refCnt before write: {}",buf.refCnt());//1
@@ -47,10 +47,10 @@ public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
 
 //            logger.info("refCnt before write: {}",buf.refCnt());//1
             CompositeByteBuf compositeByteBuf =Unpooled.compositeBuffer();
-            ctx.writeAndFlush(compositeByteBuf.addComponents(true,Unpooled.copiedBuffer("get msg ",CharsetUtil.UTF_8),buf));//必须加上true才能合并成一个ByteBuf
+            ctx.writeAndFlush(compositeByteBuf.addComponents(true , Unpooled.copiedBuffer("get msg ",CharsetUtil.UTF_8) , buf));//必须加上true才能合并成一个ByteBuf
 //            logger.info("refCnt after write: {}",buf.refCnt());//0
 
-//            ctx.fireChannelRead(Unpooled.compositeBuffer().addComponents(true,Unpooled.copiedBuffer("get msg ",CharsetUtil.UTF_8),buf));//通知下一个InboundHandler
+//            ctx.fireChannelRead(Unpooled.compositeBuffer().addComponents(true,Unpooled.copiedBuffer("get msg ",CharsetUtil.UTF_8),buf));//fire操作把数据传输给下一个InboundHandler
 
 
         } finally {
@@ -58,6 +58,12 @@ public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
 //            ReferenceCountUtil.release(buf); // 引用计数，清除引用，便于释放内存
 //            buf.release();// 和上面作用一样
         }
+    }
+
+//    the channelReadComplete() only signals that there will be no more read for the Channel in the current even-loop run. So you could for example flush now
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        logger.info("receiveMsg completed from: {}",ctx.channel().remoteAddress());
     }
 
     @Override
