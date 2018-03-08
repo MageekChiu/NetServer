@@ -1,7 +1,7 @@
 package cn.mageek.NetServer.command;
 
 import cn.mageek.NetServer.db.RedisClient;
-import cn.mageek.NetServer.handler.receiveMsgHandler;
+import cn.mageek.NetServer.pojo.NetMsgObject;
 import cn.mageek.NetServer.pojo.RcvMsgObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +29,9 @@ public class Command81 implements Command {
     }
 
     @Override
-    public void send() {
+    public RcvMsgObject send(NetMsgObject netMsgObject) {
 
+        return null;
     }
 
 

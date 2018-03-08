@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 
 /**
- * 服务端接受的消息对象
+ * 服务端<------>客户端的消息对象
  * @author Mageek Chiu
  * @date 2018/3/7 0007:18:56
  */

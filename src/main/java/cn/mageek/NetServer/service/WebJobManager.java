@@ -1,6 +1,8 @@
 package cn.mageek.NetServer.service;
 
 import cn.mageek.NetServer.db.RedisClient;
+import cn.mageek.NetServer.pojo.WebMsgObject;
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -35,6 +37,12 @@ public class WebJobManager implements Runnable{
         // 取得订阅的消息后的处理
         public void onMessage(String channel, String message) {
             logger.info("频道:{}，收到消息:{}",channel,message);
+            try {
+                WebMsgObject webMsgObject = (WebMsgObject) JSON.parse(message);
+            }catch (Exception e){
+                logger.error("解析web消息,{} error：{}",message,e.getMessage());
+                e.printStackTrace();
+            }
         }
 
         // 初始化订阅时候的处理

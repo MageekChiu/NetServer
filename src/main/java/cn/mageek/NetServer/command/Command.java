@@ -1,6 +1,8 @@
 package cn.mageek.NetServer.command;
 
+import cn.mageek.NetServer.pojo.NetMsgObject;
 import cn.mageek.NetServer.pojo.RcvMsgObject;
+import cn.mageek.NetServer.pojo.WebMsgObject;
 
 /**
  * @author Mageek Chiu
@@ -9,6 +11,6 @@ import cn.mageek.NetServer.pojo.RcvMsgObject;
 public interface Command {
 
     void receive(RcvMsgObject msgObject);
-    void send();
+    RcvMsgObject send(NetMsgObject netMsgObject);
 
 }

@@ -1,9 +1,16 @@
 package cn.mageek.NetServer.service;
 
+import cn.mageek.NetServer.command.Command;
 import cn.mageek.NetServer.db.RedisClient;
 import cn.mageek.NetServer.handler.receiveMsgHandler;
 import cn.mageek.NetServer.handler.sendMsgHandler;
+import cn.mageek.NetServer.pojo.NetMsgObject;
+import cn.mageek.NetServer.pojo.RcvMsgObject;
+import cn.mageek.NetServer.pojo.WebMsgObject;
+import cn.mageek.NetServer.util.Encoder;
+import com.alibaba.fastjson.JSON;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -59,7 +66,7 @@ public class ConnectionManager  implements Runnable{
                             p.addLast(new ReadTimeoutHandler(300));//多少秒超时
 
                             // out 执行顺序为注册顺序的逆序
-                            p.addLast(new sendMsgHandler());
+//                            p.addLast(new sendMsgHandler());
 
                             // in 执行顺序为注册顺序
                             p.addLast(new receiveMsgHandler(channelMap));
@@ -127,17 +134,31 @@ public class ConnectionManager  implements Runnable{
 //        publish netMsg 00000000000000e0-00004720-000001a6-f5b932775e48cf4c-5cb1411f
         public void onMessage(String channel, String message) {
             logger.info("频道:{}，收到消息:{}",channel,message);
-            channelMap.get(message).writeAndFlush(Unpooled.copiedBuffer("hello world", CharsetUtil.UTF_8)).addListener(new ChannelFutureListener() {
-                public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                    if (channelFuture.isSuccess()){
-                        logger.info("success",channelFuture.channel().localAddress());
-                    }else {
-                        logger.error("error: {}",channelFuture.cause().getMessage());
-                        channelFuture.cause().printStackTrace();
-                    }
+            try{
+                NetMsgObject netMsgObject = (NetMsgObject) JSON.parse(message);//根据消息字符串解析成消息对象
+                RcvMsgObject rcvMsgObject = ((Command)Class.forName("cn.mageek.NetServer.command.Command"+netMsgObject.getCommand()).newInstance()).send(netMsgObject);
+                ByteBuf out =  Encoder.objectToBytes(rcvMsgObject);//消息对象编码为buffer
+                Channel client = channelMap.get(message);
+                if(client==null){
+                    logger.error("{}不在线,消息：{}",netMsgObject.getClientId(),message);
+                    return;
                 }
+                client.writeAndFlush(out).addListener(new ChannelFutureListener() {//发送消息并监听结果
+                    public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                        if (channelFuture.isSuccess()){
+                            logger.info("success",channelFuture.channel().localAddress());
+                        }else {
+                            logger.error("error: {}",channelFuture.cause().getMessage());
+                            channelFuture.cause().printStackTrace();
+                        }
+                    }
+                });
+            }catch (Exception e){
+                logger.error("解析net消息,{} error：{}",message,e.getMessage());
+                e.printStackTrace();
             }
-            );
+
+
 
         }
 
