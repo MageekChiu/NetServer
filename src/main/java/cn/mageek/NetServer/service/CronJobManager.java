@@ -19,11 +19,11 @@ public class CronJobManager implements Runnable {
     private static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(5);
 
     public void run() {
-        logger.info("CronJobManager is up now");
+//        scheduledExecutorService.scheduleAtFixedRate(new OnlineCount(),5,5, TimeUnit.SECONDS);
 
-        scheduledExecutorService.scheduleAtFixedRate(new OnlineCount(),5,5, TimeUnit.SECONDS);
         scheduledExecutorService.scheduleAtFixedRate(new CacheToDB(),5,24, TimeUnit.HOURS);
 
+        logger.info("CronJobManager is up now");
     }
 
 }
