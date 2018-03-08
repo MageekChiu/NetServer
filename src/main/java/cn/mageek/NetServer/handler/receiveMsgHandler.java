@@ -5,10 +5,15 @@ import cn.mageek.NetServer.pojo.RcvMsgObject;
 import cn.mageek.NetServer.util.Decoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 处理server接受到来自client的消息的handler，业务逻辑的核心
@@ -18,17 +23,28 @@ import org.slf4j.LoggerFactory;
 public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(receiveMsgHandler.class);
-    private static int clientNumber = 0;
+    private static AtomicInteger clientNumber = new AtomicInteger(0);
+    private Map<String,Channel> channelMap;
+
+    public receiveMsgHandler(Map<String,Channel> channelMap){
+        this.channelMap = channelMap;
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        logger.info("new connection arrived: {}, clients living {}",ctx.channel().remoteAddress(),++clientNumber);//包含ip:port
 //        logger.debug("channel: {}",this);//根据hashcode，每个channel的handler是不同的对象
+        String uuid = ctx.channel().id().asLongText();
+        channelMap.put(uuid,ctx.channel());
+        logger.info("new connection arrived: {},uuid:{}, clients living {}",ctx.channel().remoteAddress(),uuid,clientNumber.incrementAndGet());//包含ip:port
+
+
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        logger.info("connection closed: {}, clients living {}",ctx.channel().remoteAddress(),--clientNumber);
+        String uuid = ctx.channel().id().asLongText();
+        channelMap.remove(uuid);
+        logger.info("connection closed: {},uuid:{}, clients living {}",ctx.channel().remoteAddress(),uuid,clientNumber.decrementAndGet());//包含ip:port
     }
 
     @Override
