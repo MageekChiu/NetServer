@@ -1,7 +1,9 @@
 package cn.mageek.NetServer.handler;
 
 import cn.mageek.NetServer.command.Command;
+import cn.mageek.NetServer.db.RedisClient;
 import cn.mageek.NetServer.pojo.RcvMsgObject;
+import cn.mageek.NetServer.service.WebJobManager;
 import cn.mageek.NetServer.util.Decoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -10,6 +12,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +39,9 @@ public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
         String uuid = ctx.channel().id().asLongText();
         channelMap.put(uuid,ctx.channel());
         logger.info("new connection arrived: {},uuid:{}, clients living {}",ctx.channel().remoteAddress(),uuid,clientNumber.incrementAndGet());//包含ip:port
-
+        try( Jedis jedis =  RedisClient.getJedis() ) {
+            jedis.set(ctx.channel().remoteAddress().toString(),uuid);
+        }
 
     }
 

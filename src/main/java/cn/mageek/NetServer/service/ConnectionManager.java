@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager  implements Runnable{
     private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
     private final String port;
-    private static volatile Map<String,Channel> channelMap = new ConcurrentHashMap<>();
+    private static volatile Map<String,Channel> channelMap = new ConcurrentHashMap<>();//管理所有连接
     private static final String CHANNEL = "netMsg";
 
 
@@ -40,7 +40,7 @@ public class ConnectionManager  implements Runnable{
     }
 
     public void run() {
-        new Thread(new RedisSub(channelMap)).start();
+        new Thread(new RedisSub(channelMap)).start();//开启监听redis频道
 
         // Configure the server.
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);//接收连接
@@ -124,7 +124,7 @@ public class ConnectionManager  implements Runnable{
         }
 
         // 取得订阅的消息后的处理
-//        publish netMsg 00000000000000e0-00004670-00000002-15389bd5e76ba39a-bf0cc940
+//        publish netMsg 00000000000000e0-00004720-000001a6-f5b932775e48cf4c-5cb1411f
         public void onMessage(String channel, String message) {
             logger.info("频道:{}，收到消息:{}",channel,message);
             channelMap.get(message).writeAndFlush(Unpooled.copiedBuffer("hello world", CharsetUtil.UTF_8)).addListener(new ChannelFutureListener() {
