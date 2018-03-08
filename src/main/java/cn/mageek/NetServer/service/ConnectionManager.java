@@ -44,7 +44,7 @@ public class ConnectionManager  implements Runnable{
                         public void initChannel(SocketChannel ch) throws Exception {
                             // out 必须放在最后一个 in 前面，也就是必须是以 in 结尾。逻辑是in 顺序执行完毕以后从 pipeline 反向查找 out
                             ChannelPipeline p = ch.pipeline();
-                            p.addLast(new ReadTimeoutHandler(5));//5秒超时
+                            p.addLast(new ReadTimeoutHandler(100));//多少秒超时
 
                             // out 执行顺序为注册顺序的逆序
                             p.addLast(new sendMsgHandler());

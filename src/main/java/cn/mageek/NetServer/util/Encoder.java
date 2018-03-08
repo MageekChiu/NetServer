@@ -1,6 +1,6 @@
 package cn.mageek.NetServer.util;
 
-import cn.mageek.NetServer.pojo.MsgObject;
+import cn.mageek.NetServer.pojo.RcvMsgObject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -15,7 +15,7 @@ public class Encoder {
      * @param  msgObject
      * @return
      */
-    public static ByteBuf objectToBytes(MsgObject msgObject){
+    public static ByteBuf objectToBytes(RcvMsgObject msgObject){
         ByteBuf byteBuf = Unpooled.buffer();
         return byteBuf;
     }

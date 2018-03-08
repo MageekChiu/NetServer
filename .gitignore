@@ -31,3 +31,4 @@ hs_err_pid*
 target/
 /src/main/resources/jedis.properties
 /src/main/resources/mysql.properties
+/src/main/java/cn/mageek/NetServer/helper/client.js
