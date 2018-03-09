@@ -37,7 +37,7 @@ public final class RedisClient {
             logger.info("redis pool initialized");
 
         }catch (Exception e){
-            logger.error("redis pool initialize error: {}",e.getMessage());
+            logger.error("redis pool initialize error: {}",e);
             e.printStackTrace();
         }
     }

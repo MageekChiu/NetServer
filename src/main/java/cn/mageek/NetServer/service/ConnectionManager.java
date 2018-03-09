@@ -19,14 +19,10 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
-
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,7 +43,8 @@ public class ConnectionManager  implements Runnable{
     }
 
     public void run() {
-        new Thread(new RedisSub(channelMap)).start();//开启监听redis频道
+//        new Thread(new RedisSub(channelMap)).start();//开启监听redis频道
+        new Thread(new RedisSub()).start();//开启监听redis频道
 
         // Configure the server.
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);//接收连接
@@ -108,15 +105,16 @@ public class ConnectionManager  implements Runnable{
 
     class RedisSub implements Runnable {
 
-        private Map<String,Channel> channelMap;
+//        private Map<String,Channel> channelMap;
 
-        public RedisSub(Map<String,Channel> channelMap){
-            this.channelMap = channelMap;
-        }
+//        public RedisSub(Map<String,Channel> channelMap){
+//            this.channelMap = channelMap;
+//        }
         @Override
         public void run() {
             try( Jedis jedis =  RedisClient.getJedis() ) {
-                final ConnectionManagerSubListener listener = new ConnectionManagerSubListener(channelMap);
+//                final ConnectionManagerSubListener listener = new ConnectionManagerSubListener(channelMap);
+                final ConnectionManagerSubListener listener = new ConnectionManagerSubListener();
                 logger.info("ConnectionManager begin to subscribe {}",CHANNEL);
                 jedis.subscribe(listener,CHANNEL);//策略模式的运用
             }
@@ -124,11 +122,11 @@ public class ConnectionManager  implements Runnable{
     }
 
     class ConnectionManagerSubListener extends JedisPubSub {
-        private Map<String,Channel> channelMap;
+//        private Map<String,Channel> channelMap;
 
-        public ConnectionManagerSubListener(Map<String,Channel> channelMap){
-            this.channelMap = channelMap;
-        }
+//        public ConnectionManagerSubListener(Map<String,Channel> channelMap){
+//            this.channelMap = channelMap;
+//        }
 
         // 取得订阅的消息后的处理
 //        publish netMsg 00000000000000e0-00004720-000001a6-f5b932775e48cf4c-5cb1411f
@@ -138,7 +136,7 @@ public class ConnectionManager  implements Runnable{
                 NetMsgObject netMsgObject = (NetMsgObject) JSON.parse(message);//根据消息字符串解析成消息对象
                 RcvMsgObject rcvMsgObject = ((Command)Class.forName("cn.mageek.NetServer.command.Command"+netMsgObject.getCommand()).newInstance()).send(netMsgObject);
                 ByteBuf out =  Encoder.objectToBytes(rcvMsgObject);//消息对象编码为buffer
-                Channel client = channelMap.get(message);
+                Channel client = channelMap.get(message);//内部类可以直接访问外部类的变量
                 if(client==null){
                     logger.error("{}不在线,消息：{}",netMsgObject.getClientId(),message);
                     return;
@@ -157,9 +155,6 @@ public class ConnectionManager  implements Runnable{
                 logger.error("解析net消息,{} error：{}",message,e.getMessage());
                 e.printStackTrace();
             }
-
-
-
         }
 
         // 初始化订阅时候的处理

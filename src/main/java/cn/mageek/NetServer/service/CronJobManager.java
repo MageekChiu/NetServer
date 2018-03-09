@@ -20,6 +20,7 @@ public class CronJobManager implements Runnable {
 
     public void run() {
 //        scheduledExecutorService.scheduleAtFixedRate(new OnlineCount(),5,5, TimeUnit.SECONDS);
+//        scheduledExecutorService.scheduleAtFixedRate(new OnlineCount(),5,3, TimeUnit.SECONDS);
 
         scheduledExecutorService.scheduleAtFixedRate(new CacheToDB(),5,24, TimeUnit.HOURS);
 

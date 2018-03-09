@@ -29,6 +29,9 @@ public class WebJobManager implements Runnable{
 //            logger.info("WebJobManager is up now");
 //            jedis.publish(CHANNEL, "bar123");
 //            jedis.set("server1","up1");
+        }catch (Exception e){
+            logger.error("web Job Listen to reddis error: {}",e.getMessage());
+            e.printStackTrace();
         }
     }
 

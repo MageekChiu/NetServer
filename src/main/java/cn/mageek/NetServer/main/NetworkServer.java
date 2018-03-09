@@ -1,6 +1,10 @@
-package cn.mageek.NetServer.service;
+package cn.mageek.NetServer.main;
 
+import cn.mageek.NetServer.db.MysqlClient;
 import cn.mageek.NetServer.db.RedisClient;
+import cn.mageek.NetServer.service.ConnectionManager;
+import cn.mageek.NetServer.service.CronJobManager;
+import cn.mageek.NetServer.service.WebJobManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.InputStream;
@@ -18,7 +22,8 @@ public class NetworkServer {
 
     public static void main(String[] args) throws Exception {
         try( InputStream in = ClassLoader.class.getResourceAsStream("/app.properties");
-             InputStream in2 = ClassLoader.class.getResourceAsStream("/jedis.properties")){
+             InputStream in2 = ClassLoader.class.getResourceAsStream("/jedis.properties");
+             InputStream in3 = ClassLoader.class.getResourceAsStream("/mysql.properties")){
             // 读取TCP配置
             Properties pop = new Properties();
             pop.load(in);
@@ -28,18 +33,20 @@ public class NetworkServer {
             Properties pop2 = new Properties();
             pop2.load(in2);
             RedisClient.construct(pop2);
-            // 读取mysql配置
-            // TODO
-
+            // 读取mysql配置并初始化
+            Properties pop3 = new Properties();
+            pop3.load(in3);
+            MysqlClient.construct(pop3);
 
             // 分别启动3个服务
             new Thread(new ConnectionManager(port)).start();
             new Thread(new WebJobManager()).start();
             new Thread(new CronJobManager()).start();
         }catch(Exception ex) {
-            logger.error("server start error: {}",ex.getMessage());
+            logger.error("server start error: {}",ex);//log4j能直接渲染stack trace
             ex.printStackTrace();
             RedisClient.destruct();
+            MysqlClient.destruct();
         }
     }
 }

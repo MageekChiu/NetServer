@@ -3,7 +3,6 @@ package cn.mageek.NetServer.handler;
 import cn.mageek.NetServer.command.Command;
 import cn.mageek.NetServer.db.RedisClient;
 import cn.mageek.NetServer.pojo.RcvMsgObject;
-import cn.mageek.NetServer.service.WebJobManager;
 import cn.mageek.NetServer.util.Decoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -13,8 +12,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
-
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,7 +39,6 @@ public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
         try( Jedis jedis =  RedisClient.getJedis() ) {
             jedis.set(ctx.channel().remoteAddress().toString(),uuid);
         }
-
     }
 
     @Override
@@ -79,7 +75,7 @@ public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
             command.receive(msgObject);
 
         }catch (Exception e){
-            logger.error("parse data :{} , error :{} , from: {}", ByteBufUtil.hexDump(buf),e.getMessage(),ctx.channel().remoteAddress());
+            logger.error("parse data :{} , from: {} , error :{}", ByteBufUtil.hexDump(buf),ctx.channel().remoteAddress(),e);
             e.printStackTrace();
         }finally {
 //            buf 如果在上面被发送到另一个Handler了（用了write），这里就不能释放了，因为释放buf已经变成了另一个Handler或者自定义对象（如上面的Decoder）的责任了，这里再释放就会报错
@@ -96,8 +92,7 @@ public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("receiveMsg error:{} ,from: {}",cause.getMessage(),ctx.channel().remoteAddress());
-        cause.printStackTrace();
+        logger.error("receiveMsg from: {}，error:{}",ctx.channel().remoteAddress(),cause);
         ctx.close();//这时一般就会自动关闭连接了。手动关闭的目的是避免偶尔情况下会处于未知状态
     }
 }
