@@ -8,6 +8,9 @@
     <artifactId>NetServer</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <name>Netty Based Network Server</name>
 
@@ -80,33 +83,23 @@
 
 
 
-
-
-
     </dependencies>
 
     <build>
+        <!--mvn clean compile assembly:single-->
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
                 <configuration>
-                    <mainClass>cn.mageek.NetServer.main.NetworkServer</mainClass>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
-
-            <!--(start) for package jar with dependencies -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -117,25 +110,7 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-            <!--(end) for package jar with dependencies -->
         </plugins>
     </build>
 
