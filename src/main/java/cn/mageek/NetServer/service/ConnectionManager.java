@@ -2,16 +2,14 @@ package cn.mageek.NetServer.service;
 
 import cn.mageek.NetServer.command.Command;
 import cn.mageek.NetServer.db.RedisClient;
-import cn.mageek.NetServer.handler.receiveMsgHandler;
-import cn.mageek.NetServer.handler.sendMsgHandler;
+import cn.mageek.NetServer.handler.ClientHandler;
+import cn.mageek.NetServer.handler.RcvMsgHandler;
 import cn.mageek.NetServer.pojo.NetMsgObject;
 import cn.mageek.NetServer.pojo.RcvMsgObject;
-import cn.mageek.NetServer.pojo.WebMsgObject;
 import cn.mageek.NetServer.util.Encoder;
 import com.alibaba.fastjson.JSON;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -33,9 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConnectionManager  implements Runnable{
     private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
-    private final String port;
-    private static volatile Map<String,Channel> channelMap = new ConcurrentHashMap<>();//管理所有连接
     private static final String CHANNEL = "netMsg";
+    private final String port;
+    private static final Map<String,Channel> channelMap = new ConcurrentHashMap<>();//管理所有连接
 
 
     public ConnectionManager(String port) {
@@ -63,10 +61,11 @@ public class ConnectionManager  implements Runnable{
                             p.addLast(new ReadTimeoutHandler(300));//多少秒超时
 
                             // out 执行顺序为注册顺序的逆序
-//                            p.addLast(new sendMsgHandler());
+//                            p.addLast(new SendMsgHandler());
 
                             // in 执行顺序为注册顺序
-                            p.addLast(new receiveMsgHandler(channelMap));
+                            p.addLast(new ClientHandler(channelMap));
+                            p.addLast(new RcvMsgHandler());
 
                         }
                     });
@@ -129,9 +128,14 @@ public class ConnectionManager  implements Runnable{
 //        }
 
         // 取得订阅的消息后的处理
-//        publish netMsg 00000000000000e0-00004720-000001a6-f5b932775e48cf4c-5cb1411f
         public void onMessage(String channel, String message) {
-            logger.info("频道:{}，收到消息:{}",channel,message);
+//         运行   F:\workspace\java\NetServer>node src\main\java\cn\mageek\NetServer\helper\tcpclients.js
+//         后立即运行  publish netMsg 00000000000000e0-00004720-000001a6-f5b932775e48cf4c-5cb1411f 得到日志
+//         [INFO ] 2018-03-10 14:55:51,766 cn.mageek.NetServer.handler.ClientHandler.channelActive(ClientHandler.java:36):new connection arrived: /127.0.0.1:8340,uuid:00000000000000e0-00003808-0000021c-afede79a9c5bbb5e-aff2fa90, clients living 33
+//         [INFO ] 2018-03-10 14:55:51,767 cn.mageek.NetServer.service.ConnectionManager$ConnectionManagerSubListener.onMessage(ConnectionManager.java:133):频道:netMsg，收到消息:00000000000000e0-00004720-000001a6-f5b932775e48cf4c-5cb1411f,客户端数量:33
+//         [INFO ] 2018-03-10 14:55:51,780 cn.mageek.NetServer.handler.ClientHandler.channelActive(ClientHandler.java:36):new connection arrived: /127.0.0.1:8347,uuid:00000000000000e0-00003808-00000223-89c90f9a9c5bbb5f-f77566c1, clients living 34
+
+            logger.info("频道:{}，收到消息:{},客户端数量:{}",channel,message,channelMap.size());
             try{
                 NetMsgObject netMsgObject = (NetMsgObject) JSON.parse(message);//根据消息字符串解析成消息对象
                 RcvMsgObject rcvMsgObject = ((Command)Class.forName("cn.mageek.NetServer.command.Command"+netMsgObject.getCommand()).newInstance()).send(netMsgObject);
@@ -152,8 +156,7 @@ public class ConnectionManager  implements Runnable{
                     }
                 });
             }catch (Exception e){
-                logger.error("解析net消息,{} error：{}",message,e.getMessage());
-                e.printStackTrace();
+                logger.error("解析net消息,{} error：{}",message,e);
             }
         }
 

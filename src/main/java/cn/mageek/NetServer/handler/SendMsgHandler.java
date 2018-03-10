@@ -10,16 +10,14 @@ import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.SocketAddress;
-
 /**
  *  处理server发出给client的消息的handler
  * @author Mageek Chiu
  * @date 2018/3/6 0006:19:59
  */
-public class sendMsgHandler extends ChannelOutboundHandlerAdapter {
+public class SendMsgHandler extends ChannelOutboundHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(sendMsgHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(SendMsgHandler.class);
 
 //    @Override
 //    public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) throws Exception {

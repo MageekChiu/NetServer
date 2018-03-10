@@ -12,41 +12,19 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
+
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 处理server接受到来自client的消息的handler，业务逻辑的核心
  * @author Mageek Chiu
- * @date 2018/3/5 0005:19:02
+ * @date 2018/3/10 0005:14:32
  */
-public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
+public class RcvMsgHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(receiveMsgHandler.class);
-    private static AtomicInteger clientNumber = new AtomicInteger(0);
-    private Map<String,Channel> channelMap;
+    private static final Logger logger = LoggerFactory.getLogger(RcvMsgHandler.class);
 
-    public receiveMsgHandler(Map<String,Channel> channelMap){
-        this.channelMap = channelMap;
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-//        logger.debug("channel: {}",this);//根据hashcode，每个channel的handler是不同的对象
-        String uuid = ctx.channel().id().asLongText();
-        channelMap.put(uuid,ctx.channel());
-        logger.info("new connection arrived: {},uuid:{}, clients living {}",ctx.channel().remoteAddress(),uuid,clientNumber.incrementAndGet());//包含ip:port
-        try( Jedis jedis =  RedisClient.getJedis() ) {
-            jedis.set(ctx.channel().remoteAddress().toString(),uuid);
-        }
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        String uuid = ctx.channel().id().asLongText();
-        channelMap.remove(uuid);
-        logger.info("connection closed: {},uuid:{}, clients living {}",ctx.channel().remoteAddress(),uuid,clientNumber.decrementAndGet());//包含ip:port
-    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -71,12 +49,11 @@ public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
             // 将 buffer 解析成 对象 并转发
             RcvMsgObject msgObject = Decoder.bytesToObject(buf);
             logger.info("parsed data:\n{}",msgObject);
-            Command command = (Command)Class.forName("cn.mageek.NetServer.command.Command"+msgObject.getCommand()).newInstance();//反射并创建类，类名必须写全，因为Command不止一个包下面有，会产生冲突
+            Command command = (Command)Class.forName("cn.mageek.NetServer.command.Command"+msgObject.getCommand()).newInstance();//反射并创建类，类名必须写全，因为Command类不止一个包下面有，会产生冲突
             command.receive(msgObject);
 
         }catch (Exception e){
-            logger.error("parse data :{} , from: {} , error :{}", ByteBufUtil.hexDump(buf),ctx.channel().remoteAddress(),e);
-            e.printStackTrace();
+            logger.error("parse data :{} , from: {} , error: ", ByteBufUtil.hexDump(buf),ctx.channel().remoteAddress(),e);
         }finally {
 //            buf 如果在上面被发送到另一个Handler了（用了write），这里就不能释放了，因为释放buf已经变成了另一个Handler或者自定义对象（如上面的Decoder）的责任了，这里再释放就会报错
 //            ReferenceCountUtil.release(buf); // 引用计数，清除引用，便于释放内存
@@ -90,9 +67,4 @@ public class receiveMsgHandler extends ChannelInboundHandlerAdapter {
 //        logger.info("receiveMsg completed from: {}",ctx.channel().remoteAddress());
 //    }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("receiveMsg from: {}，error:{}",ctx.channel().remoteAddress(),cause);
-        ctx.close();//这时一般就会自动关闭连接了。手动关闭的目的是避免偶尔情况下会处于未知状态
-    }
 }

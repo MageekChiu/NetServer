@@ -38,15 +38,16 @@ public class NetworkServer {
             pop3.load(in3);
             MysqlClient.construct(pop3);
 
-            // 分别启动3个服务
-            new Thread(new ConnectionManager(port)).start();
-            new Thread(new WebJobManager()).start();
-            new Thread(new CronJobManager()).start();
+            // 三个线程分别启动3个服务 连接管理服务、web消息监听服务、定时任务管理服务
+            new Thread(new ConnectionManager(port),"ConnectionManager").start();
+            new Thread(new WebJobManager(),"WebJobManager").start();
+            new Thread(new CronJobManager(),"CronJobManager").start();
         }catch(Exception ex) {
             logger.error("server start error: {}",ex);//log4j能直接渲染stack trace
             ex.printStackTrace();
             RedisClient.destruct();
             MysqlClient.destruct();
         }
+        Thread.currentThread().setName("mainJob");
     }
 }
