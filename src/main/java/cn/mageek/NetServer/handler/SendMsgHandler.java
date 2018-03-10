@@ -1,5 +1,7 @@
 package cn.mageek.NetServer.handler;
 
+import cn.mageek.NetServer.pojo.RcvMsgObject;
+import cn.mageek.NetServer.util.Encoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
@@ -11,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *  处理server发出给client的消息的handler
+ *  处理server发出给client的消息的handler，负责把消息对象转换为buffer并发送给客户端
  * @author Mageek Chiu
  * @date 2018/3/6 0006:19:59
  */
@@ -19,25 +21,16 @@ public class SendMsgHandler extends ChannelOutboundHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(SendMsgHandler.class);
 
-//    @Override
-//    public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) throws Exception {
-//        logger.info("connected: {}",ctx.channel().remoteAddress());
-//    }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        CompositeByteBuf compositeByteBuf =  Unpooled.compositeBuffer();
-        compositeByteBuf.addComponents(true,Unpooled.copiedBuffer("sendMsgHandlerWraper ",CharsetUtil.UTF_8),(ByteBuf)msg);
-        logger.debug("sendMsg: {} to {}",compositeByteBuf.toString(CharsetUtil.UTF_8),ctx.channel().remoteAddress());
-        ctx.writeAndFlush(compositeByteBuf);
+        RcvMsgObject rcvMsgObject = (RcvMsgObject)msg;
+        ByteBuf buf = Encoder.objectToBytes(rcvMsgObject);//把消息对象RcvMsgObject转换为buffer
+        logger.debug("sendMsg: {} to {}",rcvMsgObject,ctx.channel().remoteAddress());
+        ctx.writeAndFlush(buf);
         promise.setSuccess();
 
 //        super.write(ctx, compositeByteBuf, promise);//传递给下一个OutboundHandler
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("sendMsg from: {},error:{}",ctx.channel().remoteAddress(),cause);//ReadTimeoutException 会出现在这里，亦即事件会传递到handler链中最后一个事件处理中
-        ctx.close();//这时一般就会自动关闭连接了。手动关闭的目的是避免偶尔情况下会处于未知状态
-    }
 }

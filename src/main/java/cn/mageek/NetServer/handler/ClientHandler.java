@@ -51,12 +51,12 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ctx.fireChannelRead(msg);
+        ctx.fireChannelRead(msg);//传输到下一个inBound
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("receiveMsg from: {}，error",ctx.channel().remoteAddress(),cause);
+        logger.error("receiveMsg from: {}，error",ctx.channel().remoteAddress(),cause);//ReadTimeoutException 会出现在这里，亦即事件会传递到handler链中最后一个事件处理中
         ctx.close();//这时一般就会自动关闭连接了。手动关闭的目的是避免偶尔情况下会处于未知状态
     }
 }

@@ -1,13 +1,27 @@
 package cn.mageek.NetServer.pojo;
 
+import io.netty.buffer.ByteBufUtil;
+
+import java.util.Map;
+
 /**
  * net传递的消息对象
  * @author Mageek Chiu
  * @date 2018/3/8 0008:20:15
  */
 public class NetMsgObject {
+    /**
+     * 客户端标识
+     */
     private String clientId;
-    private String command;
+    /**
+     * 所需参数
+     */
+    private Map<String,String> data;
+    /**
+     * 推送标识
+     */
+    private String ref;
 
     public String getClientId() {
         return clientId;
@@ -17,12 +31,25 @@ public class NetMsgObject {
         this.clientId = clientId;
     }
 
-    public String getCommand() {
-        return command;
+    public Map<String, String> getData() {
+        return data;
     }
 
-    public void setCommand(String command) {
-        this.command = command;
+    public void setData(Map<String, String> data) {
+        this.data = data;
     }
 
+    public String getRef() {
+        return ref;
+    }
+
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    @Override
+    public String toString() {
+        return "\tclientId:" + clientId + "\n" +
+                "\tref:" + ref + "\n" ;
+    }
 }

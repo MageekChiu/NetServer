@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 处理server接受到来自client的消息的handler，业务逻辑的核心
+ * server收到的buffer转换为消息对象
  * @author Mageek Chiu
  * @date 2018/3/10 0005:14:32
  */
@@ -46,11 +46,11 @@ public class RcvMsgHandler extends ChannelInboundHandlerAdapter {
 
 //            ctx.fireChannelRead(Unpooled.compositeBuffer().addComponents(true,Unpooled.copiedBuffer("get msg ",CharsetUtil.UTF_8),buf));//fire操作把数据传输给下一个InboundHandler
 
+            // 下面都属于自己的业务逻辑 如果有耗时操作是不能直接放在这里的，否则阻塞了IO线程可能会影响其它channel从而影响整体吞吐量，所以需要分离出去
             // 将 buffer 解析成 对象 并转发
             RcvMsgObject msgObject = Decoder.bytesToObject(buf);
-            logger.info("parsed data:\n{}",msgObject);
-            Command command = (Command)Class.forName("cn.mageek.NetServer.command.Command"+msgObject.getCommand()).newInstance();//反射并创建类，类名必须写全，因为Command类不止一个包下面有，会产生冲突
-            command.receive(msgObject);
+            logger.debug("parsed data:\n{}",msgObject);
+            ctx.fireChannelRead(msgObject);//传输到下一个inBound
 
         }catch (Exception e){
             logger.error("parse data :{} , from: {} , error: ", ByteBufUtil.hexDump(buf),ctx.channel().remoteAddress(),e);
