@@ -1,20 +1,14 @@
 package cn.mageek.NetServer.service;
 
-import cn.mageek.NetServer.command.Command;
-import cn.mageek.NetServer.db.RedisClient;
+import cn.mageek.NetServer.res.RedisFactory;
 import cn.mageek.NetServer.handler.*;
-import cn.mageek.NetServer.pojo.RcvMsgObject;
 import cn.mageek.NetServer.pojo.WebMsgObject;
-import cn.mageek.NetServer.util.Encoder;
 import com.alibaba.fastjson.JSON;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -43,7 +37,7 @@ public class ConnectionManager  implements Runnable{
 
     public void run() {
 //        new Thread(new RedisSub(channelMap)).start();//开启监听redis频道
-        new Thread(new RedisSub()).start();//开启监听redis频道
+        new Thread(new RedisSub()).start();//新开线程，开启监听redis频道
 
         // Configure the server.
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);//接收连接
@@ -67,7 +61,7 @@ public class ConnectionManager  implements Runnable{
                             p.addLast("RcvMsgHandler",new RcvMsgHandler());// in //解码消息
                             p.addLast(businessGroup,"BusinessHandler",new BusinessHandler());// in //解析业务数据
                             p.addLast(businessGroup,"PushMsgHandler",new PushMsgHandler());// out //合成推送消息
-                            p.addLast("OtherHandler",new OtherHandler());// in  // 纯粹是为了占位，把PushMsgHandler防止BusinessHandler下面
+//                            p.addLast("OtherHandler",new OtherHandler());// in  // 纯粹是为了占位，把PushMsgHandler防止BusinessHandler下面。注释掉也没事，in 结尾 是扯淡，看源码，netty会自己找第一个
 
                         }
                     });
@@ -95,11 +89,11 @@ public class ConnectionManager  implements Runnable{
             logger.info("ConnectionManager is down");
 
         } catch (InterruptedException e) {
-            logger.error("ConnectionManager start error: {}", e.getMessage());
-            e.printStackTrace();
+            logger.error("ConnectionManager start error: ", e);
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
+            businessGroup.shutdownGracefully();
         }
 
     }
@@ -113,9 +107,9 @@ public class ConnectionManager  implements Runnable{
 //        }
         @Override
         public void run() {
-            try( Jedis jedis =  RedisClient.getJedis() ) {
-//                final ConnectionManagerSubListener listener = new ConnectionManagerSubListener(channelMap);
-                final ConnectionManagerSubListener listener = new ConnectionManagerSubListener();
+            try( Jedis jedis =  RedisFactory.getJedis() ) {
+//                final JedisPubSub listener = new ConnectionManagerSubListener(channelMap);
+                final JedisPubSub listener = new ConnectionManagerSubListener();
                 logger.info("ConnectionManager begin to subscribe {}", NET_MSG);
                 jedis.subscribe(listener, NET_MSG);//策略模式的运用
             }
@@ -147,7 +141,7 @@ public class ConnectionManager  implements Runnable{
                     client.writeAndFlush(webMsgObject);
                 }
             }catch (Exception e){
-                logger.error("解析net消息,{} error：{}",message,e);
+                logger.error("解析net消息,{} error: ",message,e);
             }
         }
 

@@ -10,7 +10,7 @@ for (let i = 0;i<NUMBER;i++){
 
     client.connect(PORT, HOST, function() {
         console.log(i+' 连接到: ' + HOST + ':' + PORT);
-        // client.write("4d3a35303635383330454342414681005bdcc7581b000c00006162636468656a646b73687368736873687368736873687368");
+        client.write("4d3a35303635383330454342414681005bdcc7581b000c00006162636468656a646b73687368736873687368736873687368");
         // setTimeout(function(){
         //     client.write(i+"33333333333333333333333dfsdfsdfsdfdf3333333333333333333333");
         // },1000);

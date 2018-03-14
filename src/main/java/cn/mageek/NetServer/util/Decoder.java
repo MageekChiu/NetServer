@@ -9,6 +9,8 @@ import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * 入站数据解码
  * @author Mageek Chiu
@@ -24,7 +26,7 @@ public class Decoder {
      * @param in
      * @return
      */
-    public static RcvMsgObject bytesToObject(ByteBuf in){
+    public static RcvMsgObject bytesToObject(ByteBuf in) throws IOException{
 
         if (in.readableBytes()<MINIMAL_LENGTH){
             throw new EncoderException("less than MINIMAL_LENGTH");

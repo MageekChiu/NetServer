@@ -4,6 +4,7 @@ import cn.mageek.NetServer.pojo.RcvMsgObject;
 import cn.mageek.NetServer.pojo.WebMsgObject;
 
 /**
+ * 抽象策略类
  * @author Mageek Chiu
  * @date 2018/3/7 0007:19:27
  */

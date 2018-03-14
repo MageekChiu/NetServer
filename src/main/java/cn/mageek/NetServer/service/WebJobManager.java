@@ -1,6 +1,6 @@
 package cn.mageek.NetServer.service;
 
-import cn.mageek.NetServer.db.RedisClient;
+import cn.mageek.NetServer.res.RedisFactory;
 import cn.mageek.NetServer.pojo.WebMsgObject;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
@@ -24,8 +24,8 @@ public class WebJobManager implements Runnable{
 
     public void run() {
 
-        try( Jedis jedis =  RedisClient.getJedis() ) {
-            final WebJobSubListener listener = new WebJobSubListener();
+        try( Jedis jedis =  RedisFactory.getJedis() ) {
+            final JedisPubSub listener = new WebJobSubListener();
             logger.info("WebJobManager begin to subscribe {}", WEB_MSG);
             jedis.set("server","up");
             jedis.subscribe(listener, WEB_MSG);//策略模式的运用
@@ -35,7 +35,7 @@ public class WebJobManager implements Runnable{
 //            jedis.publish(WEB_MSG, "bar123");
 //            jedis.set("server1","up1");
         }catch (Exception e){
-            logger.error("web Job Listen to redis error:",e);
+            logger.error("web Job Listen to redis error: ",e);
         }
     }
 
@@ -44,7 +44,7 @@ public class WebJobManager implements Runnable{
         private Jedis jedis;
 
         public WebJobSubListener(){
-            jedis = RedisClient.getJedis();
+            jedis = RedisFactory.getJedis();
         }
 
         // 取得订阅的消息后的处理
@@ -57,7 +57,6 @@ public class WebJobManager implements Runnable{
                 jedis.publish(NET_MSG,webMsgString);
             }catch (Exception e){
                 logger.error("解析web消息,{} error",message,e);
-                e.printStackTrace();
             }
         }
 

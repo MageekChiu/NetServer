@@ -4,6 +4,8 @@ import cn.mageek.NetServer.pojo.RcvMsgObject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.io.IOException;
+
 /**
  * 出站数据编码
  * @author Mageek Chiu
@@ -15,7 +17,7 @@ public class Encoder {
      * @param  msgObject
      * @return
      */
-    public static ByteBuf objectToBytes(RcvMsgObject msgObject){
+    public static ByteBuf objectToBytes(RcvMsgObject msgObject) throws IOException {
         ByteBuf byteBuf = Unpooled.buffer();
         return byteBuf;
     }

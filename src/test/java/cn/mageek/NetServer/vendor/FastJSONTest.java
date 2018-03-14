@@ -27,7 +27,7 @@ public class FastJSONTest {
         String webMsgString = JSON.toJSONString(webMsgObject);
         logger.debug("\n publish webMsg '"+webMsgString+"'");
 //        测试web端推送的handler执行顺序
-//        publish webMsg '{"clientId":"00000000000000e0-00004864-00000001-ad369ea559d01c55-44d3512e","command":"81","data":{},"ref":"232323213"}'
+//        publish webMsg '{"clientId":"00000000000000e0-00005840-00000001-6d4e23c4981b4e7e-97f997fa","command":"81","data":{},"ref":"232323213"}'
     }
 
     @Test

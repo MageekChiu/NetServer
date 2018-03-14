@@ -1,14 +1,10 @@
 package cn.mageek.NetServer.cron;
 
-import cn.mageek.NetServer.db.MysqlClient;
-import cn.mageek.NetServer.db.RedisClient;
-import cn.mageek.NetServer.service.WebJobManager;
+import cn.mageek.NetServer.res.MysqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 
 /**
@@ -20,7 +16,7 @@ public class OnlineCount implements Runnable{
 
     public void run(){
         String SQL_QUERY = "insert into device(mac) VALUES (?)";
-        try(Connection con = MysqlClient.getConnection()){
+        try(Connection con = MysqlFactory.getConnection()){
             PreparedStatement pst = con.prepareStatement(SQL_QUERY);
             pst.setString(1, "sasdsadsas");
             pst.executeUpdate();

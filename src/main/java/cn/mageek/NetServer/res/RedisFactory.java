@@ -1,4 +1,4 @@
-package cn.mageek.NetServer.db;
+package cn.mageek.NetServer.res;
 
 
 import org.slf4j.Logger;
@@ -13,11 +13,11 @@ import java.util.Properties;
  * @author Mageek Chiu
  * @date 2018/3/7 0007:21:37
  */
-public final class RedisClient {
+public final class RedisFactory {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedisClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisFactory.class);
 
-    private static JedisPool jedisPool;
+    private static volatile JedisPool jedisPool;
 
     public static void construct(Properties properties){
         try {
@@ -32,13 +32,17 @@ public final class RedisClient {
             config.setBlockWhenExhausted(Boolean.parseBoolean(properties.getProperty("jedis.pool.blockWhenExhausted")));
             config.setTestOnBorrow(Boolean.parseBoolean(properties.getProperty("jedis.pool.testOnBorrow")));
             config.setTestOnReturn(Boolean.parseBoolean(properties.getProperty("jedis.pool.testOnReturn")));
-            jedisPool = new JedisPool(config,properties.getProperty("redis.host"), Integer.parseInt(properties.getProperty("redis.port")),
-                    Integer.parseInt(properties.getProperty("redis.timeOut")),properties.getProperty("redis.auth"), Integer.parseInt(properties.getProperty("redis.db")));
-            logger.info("redis pool initialized");
-
+            if(jedisPool==null){//volatile+双重检查来实现单例模式
+                synchronized (RedisFactory.class){
+                    if (jedisPool==null){
+                        jedisPool = new JedisPool(config,properties.getProperty("redis.host"), Integer.parseInt(properties.getProperty("redis.port")),
+                                Integer.parseInt(properties.getProperty("redis.timeOut")),properties.getProperty("redis.auth"), Integer.parseInt(properties.getProperty("redis.db")));
+                        logger.info("redis pool initialized");
+                    }
+                }
+            }
         }catch (Exception e){
-            logger.error("redis pool initialize error: {}",e);
-            e.printStackTrace();
+            logger.error("redis pool initialize error: ",e);
         }
     }
 

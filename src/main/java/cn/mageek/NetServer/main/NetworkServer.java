@@ -1,7 +1,8 @@
 package cn.mageek.NetServer.main;
 
-import cn.mageek.NetServer.db.MysqlClient;
-import cn.mageek.NetServer.db.RedisClient;
+import cn.mageek.NetServer.res.CommandFactory;
+import cn.mageek.NetServer.res.MysqlFactory;
+import cn.mageek.NetServer.res.RedisFactory;
 import cn.mageek.NetServer.service.ConnectionManager;
 import cn.mageek.NetServer.service.CronJobManager;
 import cn.mageek.NetServer.service.WebJobManager;
@@ -32,21 +33,23 @@ public class NetworkServer {
             // 读取redis配置初始化连接池
             Properties pop2 = new Properties();
             pop2.load(in2);
-            RedisClient.construct(pop2);
+            RedisFactory.construct(pop2);
             // 读取mysql配置并初始化
             Properties pop3 = new Properties();
             pop3.load(in3);
-            MysqlClient.construct(pop3);
+            MysqlFactory.construct(pop3);
+            // 初始化命令对象
+            CommandFactory.construct();
 
             // 三个线程分别启动3个服务 连接管理服务、web消息监听服务、定时任务管理服务
             new Thread(new ConnectionManager(port),"ConnectionManager").start();
             new Thread(new WebJobManager(),"WebJobManager").start();
             new Thread(new CronJobManager(),"CronJobManager").start();
         }catch(Exception ex) {
-            logger.error("server start error: {}",ex);//log4j能直接渲染stack trace
-            ex.printStackTrace();
-            RedisClient.destruct();
-            MysqlClient.destruct();
+            logger.error("server start error:",ex);//log4j能直接渲染stack trace
+            RedisFactory.destruct();
+            MysqlFactory.destruct();
+            CommandFactory.destruct();
         }
         Thread.currentThread().setName("mainJob");
     }

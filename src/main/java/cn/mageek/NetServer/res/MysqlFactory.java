@@ -1,4 +1,4 @@
-package cn.mageek.NetServer.db;
+package cn.mageek.NetServer.res;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -13,10 +13,10 @@ import java.util.Properties;
  * @author Mageek Chiu
  * @date 2018/3/9 0009:18:39
  */
-public class MysqlClient {
-    private static final Logger logger = LoggerFactory.getLogger(MysqlClient.class);
+public class MysqlFactory {
+    private static final Logger logger = LoggerFactory.getLogger(MysqlFactory.class);
 //    https://github.com/brettwooldridge/HikariCP
-    private static HikariDataSource dataSource ;
+    private static volatile HikariDataSource dataSource ;
 
     public static void construct(Properties properties){
         try {
@@ -31,8 +31,14 @@ public class MysqlClient {
             config.addDataSourceProperty("cachePrepStmts", properties.getProperty("jdbc.properties.cachePrepStmts"));
             config.addDataSourceProperty("prepStmtCacheSize", properties.getProperty("jdbc.properties.prepStmtCacheSize"));
             config.addDataSourceProperty("prepStmtCacheSqlLimit", properties.getProperty("jdbc.properties.prepStmtCacheSqlLimit"));
-            dataSource = new HikariDataSource(config);
-            logger.info("mysql DataSource initialized");
+            if(dataSource==null) {//volatile+双重检查来实现单例模式
+                synchronized (RedisFactory.class) {
+                    if (dataSource == null) {
+                        dataSource = new HikariDataSource(config);
+                        logger.info("mysql DataSource initialized");
+                    }
+                }
+            }
         }catch (Exception e){
             logger.error("mysql DataSource initialize error: {}",e);
             e.printStackTrace();

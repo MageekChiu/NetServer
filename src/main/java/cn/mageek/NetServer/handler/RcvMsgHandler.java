@@ -1,20 +1,13 @@
 package cn.mageek.NetServer.handler;
 
-import cn.mageek.NetServer.command.Command;
-import cn.mageek.NetServer.db.RedisClient;
 import cn.mageek.NetServer.pojo.RcvMsgObject;
 import cn.mageek.NetServer.util.Decoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * server收到的buffer转换为消息对象
@@ -50,6 +43,7 @@ public class RcvMsgHandler extends ChannelInboundHandlerAdapter {
             // 将 buffer 解析成 对象 并转发
             RcvMsgObject msgObject = Decoder.bytesToObject(buf);
             logger.debug("parsed data:\n{}",msgObject);
+//            logger.debug("验证线程模型 thread:{}",Thread.currentThread().getName());//thread:nioEventLoopGroup-3-1
             ctx.fireChannelRead(msgObject);//传输到下一个inBound
 
         }catch (Exception e){

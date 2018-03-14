@@ -1,8 +1,7 @@
 package cn.mageek.NetServer.handler;
 
-import cn.mageek.NetServer.db.RedisClient;
+import cn.mageek.NetServer.res.RedisFactory;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
@@ -34,7 +33,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         String uuid = ctx.channel().id().asLongText();
         channelMap.put(uuid,ctx.channel());
         logger.info("new connection arrived: {},uuid:{}, clients living {}",ctx.channel().remoteAddress(),uuid,clientNumber.incrementAndGet());//包含ip:port
-        try( Jedis jedis =  RedisClient.getJedis() ) {
+//        logger.debug("验证线程模型 thread:{}",Thread.currentThread().getName());//hread:nioEventLoopGroup-3-1,hread:nioEventLoopGroup-3-2,hread:nioEventLoopGroup-3-3,hread:nioEventLoopGroup-3-4
+        try( Jedis jedis =  RedisFactory.getJedis() ) {
             jedis.set(ctx.channel().remoteAddress().toString(),uuid);
         }
     }
@@ -44,19 +44,20 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         String uuid = ctx.channel().id().asLongText();
         channelMap.remove(uuid);
         logger.info("connection closed: {},uuid:{}, clients living {}",ctx.channel().remoteAddress(),uuid,clientNumber.decrementAndGet());//包含ip:port
-        try( Jedis jedis =  RedisClient.getJedis() ) {
+        try( Jedis jedis =  RedisFactory.getJedis() ) {
             jedis.del(ctx.channel().remoteAddress().toString());
         }
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+//        logger.debug("验证线程模型 thread:{}",Thread.currentThread().getName());//thread:nioEventLoopGroup-3-1
         ctx.fireChannelRead(msg);//传输到下一个inBound
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("receiveMsg from: {}，error",ctx.channel().remoteAddress(),cause);//ReadTimeoutException 会出现在这里，亦即事件会传递到handler链中最后一个事件处理中
+        logger.error("receiveMsg from: {}，error: ",ctx.channel().remoteAddress(),cause);//ReadTimeoutException 会出现在这里，亦即事件会传递到handler链中最后一个事件处理中
         ctx.close();//这时一般就会自动关闭连接了。手动关闭的目的是避免偶尔情况下会处于未知状态
     }
 }
