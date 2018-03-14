@@ -1,17 +1,25 @@
 package cn.mageek.NetServer.res;
 
 import cn.mageek.NetServer.command.Command;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.tools.jar.resources.jar;
 
 import javax.print.URIException;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
+import java.nio.Buffer;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * Command 工厂类
@@ -46,23 +54,39 @@ public class CommandFactory {
         commandMap = null;
     }
 
+//    private static void getAllCommands(Map<String,Command> commandMap) throws Exception {
+//        Class clazz = Command.class;
+//        ClassLoader loader = clazz.getClassLoader();
+//        URL url = loader.getResource(packageDir);// 这个方式打包过后就不能用了，因为打包完后jar是一个整体的文件
+//        URI uri = url.toURI();
+//        File file = new File(uri);
+//        File[] files = file.listFiles();
+//        for (File f : files) {
+//            String fName = f.getName();
+//            fName = fName.substring(0, fName.length() - 6);//Command,Command11,Command81
+//            if(fName.length()>7){
+//                String commandId = fName.substring(7);
+//                String className = packagePrefix + fName ;
+//                clazz = Class.forName(className);
+//                logger.debug("Command class found: {},commandId: {}",clazz.getName(),commandId);
+//                commandMap.put(commandId,(Command)clazz.newInstance());
+//            }
+//        }
+//    }
+
     private static void getAllCommands(Map<String,Command> commandMap) throws Exception {
-        Class clazz = Command.class;
-        ClassLoader loader = clazz.getClassLoader();
-        URL url = loader.getResource(packageDir);
-        URI uri = url.toURI();
-        File file = new File(uri);
-        File[] files = file.listFiles();
-        for (File f : files) {
-            String fName = f.getName();
-            fName = fName.substring(0, fName.length() - 6);//Command,Command11,Command81
-            if(fName.length()>7){
-                String commandId = fName.substring(7);
-                String className = packagePrefix + fName ;
-                clazz = Class.forName(className);
-                logger.debug("Command class found: {},commandId: {}",clazz.getName(),commandId);
-                commandMap.put(commandId,(Command)clazz.newInstance());
-            }
+
+        Reflections reflections = new Reflections(packagePrefix);
+
+        Set<Class<? extends Command>> subTypes = reflections.getSubTypesOf(Command.class);
+
+        int idStart = packagePrefix.length()+7;
+        for(Class clazz : subTypes){
+            String className = clazz.getName();
+            String commandId = className.substring(idStart);
+            logger.debug("Command class found: {} , Id: {}",clazz.getName(),commandId);
+            commandMap.put(commandId,(Command)clazz.newInstance());
         }
     }
+
 }
