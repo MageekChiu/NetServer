@@ -28,20 +28,23 @@ public class MysqlFactory {
             config.setMaximumPoolSize(Integer.parseInt(properties.getProperty("jdbc.properties.maximumPoolSize")));
             config.setMinimumIdle(Integer.parseInt(properties.getProperty("jdbc.properties.minimumIdle")));
             config.setPoolName(properties.getProperty("jdbc.properties.poolName"));
+            config.setConnectionTimeout(Long.parseLong(properties.getProperty("jdbc.properties.timeout")));
             config.addDataSourceProperty("cachePrepStmts", properties.getProperty("jdbc.properties.cachePrepStmts"));
             config.addDataSourceProperty("prepStmtCacheSize", properties.getProperty("jdbc.properties.prepStmtCacheSize"));
             config.addDataSourceProperty("prepStmtCacheSqlLimit", properties.getProperty("jdbc.properties.prepStmtCacheSqlLimit"));
+            config.addDataSourceProperty("retryAttempts", properties.getProperty("jdbc.properties.prepStmtCacheSqlLimit"));
+            config.addDataSourceProperty("autoReconnect", properties.getProperty("jdbc.properties.autoReconnect"));
             if(dataSource==null) {//volatile+双重检查来实现单例模式
                 synchronized (RedisFactory.class) {
                     if (dataSource == null) {
+//                        Thread.sleep(5000);// 暂停一会，等mysql起来？？，怎么自动重连呢？用autoReconnect
                         dataSource = new HikariDataSource(config);
                         logger.info("mysql DataSource initialized");
                     }
                 }
             }
         }catch (Exception e){
-            logger.error("mysql DataSource initialize error: {}",e);
-            e.printStackTrace();
+            logger.error("mysql DataSource initialize error: ",e);
         }
     }
 

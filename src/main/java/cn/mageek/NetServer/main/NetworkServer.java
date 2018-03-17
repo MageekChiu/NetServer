@@ -22,6 +22,7 @@ public class NetworkServer {
     private static final Logger logger = LoggerFactory.getLogger(NetworkServer.class);
 
     public static void main(String[] args) throws Exception {
+        Thread connectionManager,webJobManager,cronJobManager;
         try( InputStream in = ClassLoader.class.getResourceAsStream("/app.properties");
              InputStream in2 = ClassLoader.class.getResourceAsStream("/jedis.properties");
              InputStream in3 = ClassLoader.class.getResourceAsStream("/mysql.properties")){
@@ -42,15 +43,16 @@ public class NetworkServer {
             CommandFactory.construct();
 
             // 三个线程分别启动3个服务 连接管理服务、web消息监听服务、定时任务管理服务
-            new Thread(new ConnectionManager(port),"ConnectionManager").start();
-            new Thread(new WebJobManager(),"WebJobManager").start();
-            new Thread(new CronJobManager(),"CronJobManager").start();
+            connectionManager = new Thread(new ConnectionManager(port),"ConnectionManager");
+            webJobManager = new Thread(new WebJobManager(),"WebJobManager");
+            cronJobManager = new Thread(new CronJobManager(),"CronJobManager");
+            connectionManager.start();webJobManager.start();cronJobManager.start();
         }catch(Exception ex) {
             logger.error("server start error:",ex);//log4j能直接渲染stack trace
             RedisFactory.destruct();
             MysqlFactory.destruct();
             CommandFactory.destruct();
         }
-        Thread.currentThread().setName("mainJob");
+        Thread.currentThread().setName("NetworkServer");
     }
 }

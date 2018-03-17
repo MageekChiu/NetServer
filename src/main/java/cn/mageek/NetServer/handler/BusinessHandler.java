@@ -31,6 +31,8 @@ public class BusinessHandler extends ChannelInboundHandlerAdapter {
             logger.error("错误的命令: {}",rcvMsgObject);
             return;
         }
+        // 上面其实就是类似于 tomcat 加载 servlet 的时机选择的情况
+
         // 命令模式的使用，这个命令是自定义的
         RcvMsgObject rcvMsgObject1 = command.receive(rcvMsgObject);//接受消息并处理
         if (rcvMsgObject1!=null){//如果需要响应操作
