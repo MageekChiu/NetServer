@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 管理本应用的所有服务
@@ -22,6 +23,7 @@ public class NetworkServer {
     private static final Logger logger = LoggerFactory.getLogger(NetworkServer.class);
 
     public static void main(String[] args) throws Exception {
+        Thread.currentThread().setName("NetworkServer");
         Thread connectionManager,webJobManager,cronJobManager;
         try( InputStream in = ClassLoader.class.getResourceAsStream("/app.properties");
              InputStream in2 = ClassLoader.class.getResourceAsStream("/jedis.properties");
@@ -42,17 +44,19 @@ public class NetworkServer {
             // 初始化命令对象
             CommandFactory.construct();
 
+            CountDownLatch countDownLatch = new CountDownLatch(4);
             // 三个线程分别启动3个服务 连接管理服务、web消息监听服务、定时任务管理服务
-            connectionManager = new Thread(new ConnectionManager(port),"ConnectionManager");
-            webJobManager = new Thread(new WebJobManager(),"WebJobManager");
-            cronJobManager = new Thread(new CronJobManager(),"CronJobManager");
+            connectionManager = new Thread(new ConnectionManager(port,countDownLatch),"ConnectionManager");
+            webJobManager = new Thread(new WebJobManager(countDownLatch),"WebJobManager");
+            cronJobManager = new Thread(new CronJobManager(countDownLatch),"CronJobManager");
             connectionManager.start();webJobManager.start();cronJobManager.start();
+            countDownLatch.await();//等待其他几个线程完全启动，然后才能对外提供服务
+            logger.info("Network Server is fully up now");
         }catch(Exception ex) {
             logger.error("server start error:",ex);//log4j能直接渲染stack trace
             RedisFactory.destruct();
             MysqlFactory.destruct();
             CommandFactory.destruct();
         }
-        Thread.currentThread().setName("NetworkServer");
     }
 }

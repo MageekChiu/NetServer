@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
  * 监听来自web的指令并转发给connectionManager
  * 之所以不直接在connectionManager监听是为了扩展性，因为以后可能有来自rpc、http等其他地方的指令
@@ -21,6 +23,14 @@ public class WebJobManager implements Runnable{
     private static final String NET_MSG = "netMsg";
 
     private static final Logger logger = LoggerFactory.getLogger(WebJobManager.class);
+
+    private CountDownLatch countDownLatch;
+
+    public WebJobManager(CountDownLatch countDownLatch) {
+        this.countDownLatch = countDownLatch;
+    }
+
+
 
     public void run() {
 
@@ -64,6 +74,7 @@ public class WebJobManager implements Runnable{
         public void onSubscribe(String channel, int subscribedChannels) {
             logger.info("订阅:{}，总数:{}",channel,subscribedChannels);
             logger.info("WebJobManager is up now");
+            countDownLatch.countDown();
         }
 
         // 取消订阅时候的处理

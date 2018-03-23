@@ -18,6 +18,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 监听和接受连接请求，亦即创建channel并配置消息处理的handler
@@ -30,9 +31,12 @@ public class ConnectionManager  implements Runnable{
     private final String port;
     private static final Map<String,Channel> channelMap = new ConcurrentHashMap<>();//管理所有连接
 
+    private CountDownLatch countDownLatch;
 
-    public ConnectionManager(String port) {
+
+    public ConnectionManager(String port,CountDownLatch countDownLatch) {
         this.port = port;
+        this.countDownLatch = countDownLatch;
     }
 
     public void run() {
@@ -69,6 +73,7 @@ public class ConnectionManager  implements Runnable{
             // Start the server. 采用同步等待的方式
             ChannelFuture f = b.bind(Integer.parseInt(port)).sync();
             logger.info("ConnectionManager is up now and listens on {}", f.channel().localAddress());
+            countDownLatch.countDown();
 
             // Start the server. 采用异步回调的方式
 //            ChannelFuture f = b.bind(Integer.parseInt(port));
@@ -148,6 +153,7 @@ public class ConnectionManager  implements Runnable{
         // 初始化订阅时候的处理
         public void onSubscribe(String channel, int subscribedChannels) {
             logger.info("订阅:{}，总数:{}",channel,subscribedChannels);
+            countDownLatch.countDown();
         }
 
         // 取消订阅时候的处理
