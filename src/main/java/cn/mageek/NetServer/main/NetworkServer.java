@@ -37,7 +37,7 @@ public class NetworkServer {
             pop.load(in);
             String port = pop.getProperty("NetServer.port");
             String serverId = pop.getProperty("NetServer.id");
-            logger.debug("config port:{}",port);
+            logger.debug("config port:{},serverId: {}",port,serverId);
             // 读取redis配置初始化连接池
             Properties pop2 = new Properties();
             pop2.load(in2);
@@ -49,6 +49,7 @@ public class NetworkServer {
             // 初始化ZooKeeper连接
             Properties pop4 = new Properties();
             pop4.load(in4);
+            String pattern = pop4.getProperty("zk.pattern");
             ZooKeeperFactory.construct(pop4);
             // 初始化命令对象
             CommandFactory.construct();
@@ -62,13 +63,21 @@ public class NetworkServer {
             countDownLatch.await();//等待其他几个线程完全启动，然后才能对外提供服务
             logger.info("Network Server is fully up now");
 
-            ZooKeeperFactory.getZooKeeper().create("/node_"+serverId,"up".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+            // 原生api
+//            ZooKeeperFactory.getZooKeeper().create("/node="+serverId,"up".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+            //添加
+//            ZooKeeperFactory.getZooKeeper().create().forPath(pattern+serverId,"up".getBytes());
+            //修改
+            ZooKeeperFactory.getZooKeeper().setData().forPath(pattern+serverId,"change".getBytes());
+            ZooKeeperFactory.getZooKeeper().create().forPath(pattern+serverId+"/sub1","up".getBytes());
+
 
         }catch(Exception ex) {
             logger.error("server start error:",ex);//log4j能直接渲染stack trace
             RedisFactory.destruct();
             MysqlFactory.destruct();
             CommandFactory.destruct();
+            ZooKeeperFactory.destruct();
         }
     }
 }
