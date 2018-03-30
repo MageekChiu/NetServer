@@ -18,7 +18,7 @@ import java.io.IOException;
  */
 public class Decoder {
 
-    private final static int MINIMAL_LENGTH = 24;
+    private static final int MINIMAL_LENGTH = 24;
     private static final Logger logger = LoggerFactory.getLogger(Decoder.class);
 
     /**

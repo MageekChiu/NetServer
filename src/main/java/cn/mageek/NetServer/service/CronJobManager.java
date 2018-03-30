@@ -2,6 +2,7 @@ package cn.mageek.NetServer.service;
 
 import cn.mageek.NetServer.cron.CacheToDB;
 import cn.mageek.NetServer.cron.OnlineCount;
+import cn.mageek.NetServer.res.CronJobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +28,11 @@ public class CronJobManager implements Runnable {
 
 
     public void run() {
-        scheduledExecutorService.scheduleAtFixedRate(new OnlineCount(),5,5, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(CronJobFactory.getCronJob("OnlineCount"),5,5, TimeUnit.SECONDS);
+//        scheduledExecutorService.scheduleAtFixedRate(new OnlineCount(),5,5, TimeUnit.SECONDS);
 //        scheduledExecutorService.scheduleAtFixedRate(new OnlineCount(),5,3, TimeUnit.SECONDS);
 
-        scheduledExecutorService.scheduleAtFixedRate(new CacheToDB(),5,24, TimeUnit.HOURS);
+        scheduledExecutorService.scheduleAtFixedRate(CronJobFactory.getCronJob("CacheToDB"),5,24, TimeUnit.HOURS);
 
         logger.info("CronJobManager is up now");
         countDownLatch.countDown();

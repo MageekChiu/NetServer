@@ -20,10 +20,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientHandler.class);
     private static final AtomicInteger clientNumber = new AtomicInteger(0);
-    // 下面的 field 是线程安全的，所以多个线程修改是没有问题的。
+    // 下面的 field 是线程安全的,由manager传入的concurrentHashMap，所以多个线程修改是没有问题的。
     private Map<String,Channel> channelMap;
 
-    public ClientHandler(Map<String,Channel> channelMap){
+    public ClientHandler(final Map<String,Channel> channelMap){
         this.channelMap = channelMap;
     }
 

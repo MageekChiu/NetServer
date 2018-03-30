@@ -3,6 +3,8 @@ package cn.mageek.NetServer.util;
 import cn.mageek.NetServer.pojo.RcvMsgObject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -12,6 +14,9 @@ import java.io.IOException;
  * @date 2018/3/7 0007:18:53
  */
 public class Encoder {
+
+    private static final int MINIMAL_LENGTH = 24;
+    private static final Logger logger = LoggerFactory.getLogger(Encoder.class);
     /**
      * 将消息对象解析为bit数据
      * @param  msgObject

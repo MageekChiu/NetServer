@@ -25,8 +25,8 @@ import java.util.jar.JarFile;
  * @date 2018/3/13 0013:21:49
  */
 public class CommandFactory {
-    private static String packageDir = "cn/mageek/NetServer/command";
-    private static String packagePrefix = "cn.mageek.NetServer.command.";
+    private static final String packageDir = "cn/mageek/NetServer/command";
+    private static final String packagePrefix = "cn.mageek.NetServer.command.";
     private static final Logger logger = LoggerFactory.getLogger(CommandFactory.class);
 
     private static volatile Map<String,Command> commandMap ;

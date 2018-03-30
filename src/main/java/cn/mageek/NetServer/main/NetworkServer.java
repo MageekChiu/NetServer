@@ -1,6 +1,7 @@
 package cn.mageek.NetServer.main;
 
 import cn.mageek.NetServer.res.CommandFactory;
+import cn.mageek.NetServer.res.CronJobFactory;
 import cn.mageek.NetServer.res.MysqlFactory;
 import cn.mageek.NetServer.res.RedisFactory;
 import cn.mageek.NetServer.service.ConnectionManager;
@@ -22,7 +23,7 @@ public class NetworkServer {
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkServer.class);
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args){
         Thread.currentThread().setName("NetworkServer");
         Thread connectionManager,webJobManager,cronJobManager;
         try( InputStream in = ClassLoader.class.getResourceAsStream("/app.properties");
@@ -43,6 +44,8 @@ public class NetworkServer {
             MysqlFactory.construct(pop3);
             // 初始化命令对象
             CommandFactory.construct();
+            // 初始化定时任务对象
+            CronJobFactory.construct();
 
             CountDownLatch countDownLatch = new CountDownLatch(4);
             // 三个线程分别启动3个服务 连接管理服务、web消息监听服务、定时任务管理服务

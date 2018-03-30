@@ -27,17 +27,12 @@ public class PushMsgHandler extends ChannelOutboundHandlerAdapter {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         // 这种判断的方式比较浪费性能，是否有更优雅的解决方式？？？
-        // 交换 PushMsgHandler 和 BusinessHandler 顺序即可，但是BusinessHandler必须处于最后？？
+        // 交换 PushMsgHandler 和 BusinessHandler 顺序即可，但是BusinessHandler必须处于最后？？使得回复的报文不需要经过PushMsgHandler
         // 可以再加一个InboundHandler
         if(msg instanceof WebMsgObject ){//是主动推送，需要编码
             WebMsgObject webMsgObject = (WebMsgObject)msg;;//根据消息字符串解析成消息对象
             RcvMsgObject rcvMsgObject =  ((Command)Class.forName("cn.mageek.NetServer.command.Command"+webMsgObject.getCommand()).newInstance()).send(webMsgObject);
             logger.debug("pushMsg: {} to {}",rcvMsgObject,ctx.channel().remoteAddress());
-//            super.write(ctx,rcvMsgObject,promise);
-            ctx.writeAndFlush(rcvMsgObject);
-        }else if (msg instanceof RcvMsgObject ){
-            RcvMsgObject rcvMsgObject = (RcvMsgObject)msg;//是回复，可以直接传输给下一个handler
-            logger.debug("feedbackMsg: {} to {}",rcvMsgObject,ctx.channel().remoteAddress());
 //            super.write(ctx,rcvMsgObject,promise);
             ctx.writeAndFlush(rcvMsgObject);
         }else{
