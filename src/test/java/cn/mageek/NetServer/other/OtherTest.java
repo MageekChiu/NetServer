@@ -23,7 +23,9 @@ public class OtherTest {
         String ab = "sadasad";
         logger.info("res:{}",ab.indexOf("ad"));
 
-        
+        int a = 3;Integer b =3;Integer c=new Integer(3);
+        System.out.println(a==b);
+        System.out.println(b==c);
 
     }
 }
