@@ -52,7 +52,7 @@ public class MysqlFactory {
                         TransactionFactory transactionFactory = new JdbcTransactionFactory();
                         Environment environment = new Environment("development", transactionFactory, dataSource);
                         Configuration configuration = new Configuration(environment);
-
+                        // 添加mapper
                         configuration.addMapper(HistoryMapper.class);
                         configuration.addMapper(InfoMapper.class);
 

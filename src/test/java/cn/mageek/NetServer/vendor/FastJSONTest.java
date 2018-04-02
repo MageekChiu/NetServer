@@ -1,6 +1,7 @@
 package cn.mageek.NetServer.vendor;
 
 import cn.mageek.NetServer.model.net.WebMsgObject;
+import cn.mageek.NetServer.model.pojo.History;
 import com.alibaba.fastjson.JSON;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -27,6 +28,11 @@ public class FastJSONTest {
         logger.debug("\n publish webMsg '"+webMsgString+"'");
 //        测试web端推送的handler执行顺序
 //        publish webMsg '{"clientId":"00000000000000e0-00005840-00000001-6d4e23c4981b4e7e-97f997fa","command":"81","data":{},"ref":"232323213"}'
+
+        History history = new History();history.setId(22);history.setSignal(12.4);history.setPower(23.5);
+        logger.debug(JSON.toJSONString(history));
+//        {"id":22,"power":23.5,"signal":12.4}
+//        {"power":23.5,"signal":12.4}
     }
 
     @Test

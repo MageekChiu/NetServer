@@ -28,11 +28,11 @@ public class CronJobManager implements Runnable {
 
 
     public void run() {
-        scheduledExecutorService.scheduleAtFixedRate(CronJobFactory.getCronJob("OnlineCount"),5,5, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(CronJobFactory.getCronJob("CacheToDB"),2,10, TimeUnit.SECONDS);
 //        scheduledExecutorService.scheduleAtFixedRate(new OnlineCount(),5,5, TimeUnit.SECONDS);
 //        scheduledExecutorService.scheduleAtFixedRate(new OnlineCount(),5,3, TimeUnit.SECONDS);
 
-        scheduledExecutorService.scheduleAtFixedRate(CronJobFactory.getCronJob("CacheToDB"),5,24, TimeUnit.HOURS);
+        scheduledExecutorService.scheduleAtFixedRate(CronJobFactory.getCronJob("OnlineCount"),5,24, TimeUnit.HOURS);
 
         logger.info("CronJobManager is up now");
         countDownLatch.countDown();

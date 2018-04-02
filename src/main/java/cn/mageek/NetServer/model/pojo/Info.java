@@ -1,26 +1,46 @@
 package cn.mageek.NetServer.model.pojo;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Mageek Chiu
  * @date 2018/4/2 0002:12:10
  */
 public class Info {
-    public static String getId() {
+    public int getId() {
         return id;
     }
 
-    public static void setId(String id) {
-        Info.id = id;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public static float getSignal() {
+    public float getSignal() {
         return signal;
     }
 
-    public static void setSignal(float signal) {
-        Info.signal = signal;
+    public void setSignal(float signal) {
+        this.signal = signal;
     }
 
-    private static String id;
-    private static float signal;
+    public String getMac() {
+        return mac;
+    }
+
+    public void setMac(String mac) {
+        this.mac = mac;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    private int id;
+    private float signal;
+    private String mac;
+    private LocalDateTime createTime;
 }

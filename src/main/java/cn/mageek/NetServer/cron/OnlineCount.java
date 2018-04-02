@@ -3,7 +3,7 @@ package cn.mageek.NetServer.cron;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cn.mageek.NetServer.util.ConstPool.L_SUCCESS;
+import static cn.mageek.NetServer.res.ConstPool.L_SUCCESS;
 
 /**
  * @author Mageek Chiu

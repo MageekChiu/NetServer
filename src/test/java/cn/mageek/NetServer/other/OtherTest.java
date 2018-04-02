@@ -23,9 +23,13 @@ public class OtherTest {
         String ab = "sadasad";
         logger.info("res:{}",ab.indexOf("ad"));
 
-        int a = 3;Integer b =3;Integer c=new Integer(3);
-        System.out.println(a==b);
-        System.out.println(b==c);
+//        int a = 3;Integer b =3;Integer c=new Integer(3);
+//        System.out.println(a==b);
+//        System.out.println(b==c);
+
+        long a =5;int b = 3;int c = 5;
+        System.out.println(Math.ceil(a/b)+","+Math.ceil(c/b));
+        System.out.println(Math.ceil((double)a/b)+","+Math.ceil(c/b));
 
     }
 }

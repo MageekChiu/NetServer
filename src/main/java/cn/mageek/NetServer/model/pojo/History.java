@@ -5,30 +5,30 @@ package cn.mageek.NetServer.model.pojo;
  * @date 2018/4/2 0002:12:10
  */
 public class History {
-    public static String getId() {
+    public int getId() {
         return id;
     }
 
-    public static void setId(String id) {
-        History.id = id;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public static float getSignal() {
+    public double getSignal() {
         return signal;
     }
 
-    public static void setSignal(float signal) {
-        History.signal = signal;
+    public void setSignal(double signal) {
+        this.signal = signal;
     }
 
-    public static float getPower() {
+    public double getPower() {
         return power;
     }
 
-    public static void setPower(float power) {
-        History.power = power;
+    public void setPower(double power) {
+        this.power = power;
     }
-    private static String id;
-    private static float signal;
-    private static float power;
+    private int id;
+    private double signal;
+    private double power;
 }
