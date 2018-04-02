@@ -1,7 +1,12 @@
 package cn.mageek.NetServer.cron;
 
+import cn.mageek.NetServer.model.mapper.HistoryMapper;
+import cn.mageek.NetServer.model.pojo.History;
 import cn.mageek.NetServer.res.MysqlFactory;
 import cn.mageek.NetServer.res.RedisFactory;
+import com.alibaba.fastjson.JSON;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -26,14 +31,13 @@ public class CacheToDB implements Runnable{
 
     public void run(){
         add();
-        modify();
+//        modify();
     }
 
     private void add(){
         String SQL_QUERY = "insert into "+T_HISTORY+"(mac,signal) VALUES (?)";
-        try(Connection con = MysqlFactory.getConnection();
+        try(SqlSession sqlSession = MysqlFactory.getSession(ExecutorType.BATCH);// 批量插入
             Jedis jedis = RedisFactory.getJedis()){
-            PreparedStatement pst = con.prepareStatement(SQL_QUERY);
 
             long keyLen = jedis.llen(K_HIST);
             Transaction tx = jedis.multi();
@@ -41,24 +45,22 @@ public class CacheToDB implements Runnable{
                 tx.rpop(K_HIST);
             }
             List<Object> resultList = tx.exec();
-
+            HistoryMapper historyMapper = sqlSession.getMapper(HistoryMapper.class);
             resultList.forEach((data)->{
-
+                History history = JSON.parseObject(data.toString(), History.class);//出队反序列化
+                historyMapper.insert(history);//插入数据库
             });
-
-            pst.setString(1, "sasdsadsas");
-            pst.executeUpdate();
+            sqlSession.flushStatements();//提交
             logger.info(L_SUCCESS);
         }catch (Exception e){
-            logger.error(T_ERROR,e);
+            logger.error(L_ERROR,e);
         }
     }
 
     private void modify(){
-        String SQL_QUERY = "insert into device(mac) VALUES (?)";
-        try(Connection con = MysqlFactory.getConnection();
+        String SQL_QUERY = "insert into "+T_INFO+"(mac) VALUES (?)";
+        try(SqlSession sqlSession = MysqlFactory.getSession(null);
             Jedis jedis = RedisFactory.getJedis()){
-            PreparedStatement pst = con.prepareStatement(SQL_QUERY);
 
             // 遍历redis变量
             ScanParams params = new ScanParams().count(100).match(K_MAC);
@@ -71,12 +73,9 @@ public class CacheToDB implements Runnable{
                 cur = result.getStringCursor();
             }while (!(ScanParams.SCAN_POINTER_START.equals(cur)));
 
-
-            pst.setString(1, "sasdsadsas");
-            pst.executeUpdate();
             logger.info(L_SUCCESS);
         }catch (Exception e){
-            logger.error(T_ERROR,e);
+            logger.error(L_ERROR,e);
         }
     }
 }

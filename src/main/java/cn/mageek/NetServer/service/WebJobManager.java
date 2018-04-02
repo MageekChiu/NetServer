@@ -1,7 +1,7 @@
 package cn.mageek.NetServer.service;
 
 import cn.mageek.NetServer.res.RedisFactory;
-import cn.mageek.NetServer.pojo.WebMsgObject;
+import cn.mageek.NetServer.model.net.WebMsgObject;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

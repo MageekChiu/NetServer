@@ -1,11 +1,6 @@
 package cn.mageek.NetServer.handler;
 
-import cn.mageek.NetServer.command.Command;
-import cn.mageek.NetServer.pojo.RcvMsgObject;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 占位

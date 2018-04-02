@@ -1,6 +1,6 @@
 package cn.mageek.NetServer.handler;
 
-import cn.mageek.NetServer.pojo.RcvMsgObject;
+import cn.mageek.NetServer.model.net.RcvMsgObject;
 import cn.mageek.NetServer.util.Decoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;

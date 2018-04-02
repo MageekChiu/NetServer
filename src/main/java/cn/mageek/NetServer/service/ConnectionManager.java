@@ -2,7 +2,7 @@ package cn.mageek.NetServer.service;
 
 import cn.mageek.NetServer.res.RedisFactory;
 import cn.mageek.NetServer.handler.*;
-import cn.mageek.NetServer.pojo.WebMsgObject;
+import cn.mageek.NetServer.model.net.WebMsgObject;
 import com.alibaba.fastjson.JSON;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;

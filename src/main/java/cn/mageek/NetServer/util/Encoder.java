@@ -1,6 +1,6 @@
 package cn.mageek.NetServer.util;
 
-import cn.mageek.NetServer.pojo.RcvMsgObject;
+import cn.mageek.NetServer.model.net.RcvMsgObject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.slf4j.Logger;

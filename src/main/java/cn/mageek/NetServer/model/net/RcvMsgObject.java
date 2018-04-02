@@ -1,4 +1,4 @@
-package cn.mageek.NetServer.pojo;
+package cn.mageek.NetServer.model.net;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;

@@ -2,7 +2,7 @@ package cn.mageek.NetServer.handler;
 
 import cn.mageek.NetServer.command.Command;
 import cn.mageek.NetServer.res.CommandFactory;
-import cn.mageek.NetServer.pojo.RcvMsgObject;
+import cn.mageek.NetServer.model.net.RcvMsgObject;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;

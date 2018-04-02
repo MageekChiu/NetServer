@@ -1,10 +1,17 @@
 package cn.mageek.NetServer.res;
 
+import cn.mageek.NetServer.model.mapper.HistoryMapper;
+import cn.mageek.NetServer.model.mapper.InfoMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.apache.ibatis.mapping.Environment;
+import org.apache.ibatis.session.*;
+import org.apache.ibatis.transaction.TransactionFactory;
+import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -17,6 +24,7 @@ public class MysqlFactory {
     private static final Logger logger = LoggerFactory.getLogger(MysqlFactory.class);
 //    https://github.com/brettwooldridge/HikariCP
     private static volatile HikariDataSource dataSource ;
+    private static SqlSessionFactory sqlSessionFactory;
 
     public static void construct(Properties properties){
         try {
@@ -40,6 +48,21 @@ public class MysqlFactory {
 //                        Thread.sleep(5000);// 暂停一会，等mysql起来？？，怎么自动重连呢？用autoReconnect
                         dataSource = new HikariDataSource(config);
                         logger.info("mysql DataSource initialized");
+
+                        TransactionFactory transactionFactory = new JdbcTransactionFactory();
+                        Environment environment = new Environment("development", transactionFactory, dataSource);
+                        Configuration configuration = new Configuration(environment);
+
+                        configuration.addMapper(HistoryMapper.class);
+                        configuration.addMapper(InfoMapper.class);
+
+                        sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
+                        // 使用配置文件
+//                        String resource = "conf.xml";//调取配置文件
+//                        InputStream is = MysqlFactory.class.getClassLoader().getResourceAsStream(resource);
+//                        SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(is);
+                        logger.info("mysql sqlSessionFactory initialized");
+
                     }
                 }
             }
@@ -48,6 +71,11 @@ public class MysqlFactory {
         }
     }
 
+    /**
+     * 直接使用mysql语句
+     * @return
+     * @throws SQLException
+     */
     public static Connection getConnection() throws SQLException {
 //        try {
             return dataSource.getConnection();
@@ -56,6 +84,16 @@ public class MysqlFactory {
 //            e.printStackTrace();
 //            return null;
 //        }
+    }
+
+    /**
+     * 使用mybatis操作
+     * @return
+     */
+    public static SqlSession getSession(ExecutorType type){
+        if (type!=null)
+            return sqlSessionFactory.openSession(type);
+        return sqlSessionFactory.openSession();
     }
 
     public static void destruct(){

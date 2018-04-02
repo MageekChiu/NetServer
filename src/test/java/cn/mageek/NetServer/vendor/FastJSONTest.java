@@ -1,7 +1,6 @@
 package cn.mageek.NetServer.vendor;
 
-import cn.mageek.NetServer.handler.ClientHandler;
-import cn.mageek.NetServer.pojo.WebMsgObject;
+import cn.mageek.NetServer.model.net.WebMsgObject;
 import com.alibaba.fastjson.JSON;
 import org.junit.Test;
 import org.slf4j.Logger;

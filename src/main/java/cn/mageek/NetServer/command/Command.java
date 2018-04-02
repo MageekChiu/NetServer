@@ -1,7 +1,7 @@
 package cn.mageek.NetServer.command;
 
-import cn.mageek.NetServer.pojo.RcvMsgObject;
-import cn.mageek.NetServer.pojo.WebMsgObject;
+import cn.mageek.NetServer.model.net.RcvMsgObject;
+import cn.mageek.NetServer.model.net.WebMsgObject;
 
 /**
  * 抽象策略类

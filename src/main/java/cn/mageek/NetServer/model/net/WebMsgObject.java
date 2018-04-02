@@ -1,4 +1,4 @@
-package cn.mageek.NetServer.pojo;
+package cn.mageek.NetServer.model.net;
 
 import java.util.Map;
 

@@ -1,8 +1,9 @@
 package cn.mageek.NetServer.command;
 
 import cn.mageek.NetServer.res.RedisFactory;
-import cn.mageek.NetServer.pojo.RcvMsgObject;
-import cn.mageek.NetServer.pojo.WebMsgObject;
+import cn.mageek.NetServer.model.net.RcvMsgObject;
+import cn.mageek.NetServer.model.net.WebMsgObject;
+import com.alibaba.fastjson.JSON;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ public class Command81 implements Command {
             map.put("timestamp", String.valueOf(msgObject.getTimestamp()));
             map.put("mac",msgObject.getMac());
             jedis.hmset("device:"+msgObject.getMac(),map);
+            jedis.lpush("history", JSON.toJSONString(msgObject));//序列化入队
             logger.debug("转发收到并存储，{}",msgObject.getMac());
 
 //            测试回复消息的handler执行顺序

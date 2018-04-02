@@ -1,6 +1,4 @@
-package cn.mageek.NetServer.pojo;
-
-import io.netty.buffer.ByteBufUtil;
+package cn.mageek.NetServer.model.net;
 
 import java.util.Map;
 

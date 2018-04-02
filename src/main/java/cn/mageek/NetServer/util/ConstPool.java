@@ -16,7 +16,7 @@ public final class ConstPool {
 
     // 日志 L
     public static final String L_SUCCESS = "执行成功:";
-    public static final String T_ERROR = "执行错误:";
+    public static final String L_ERROR = "执行错误:";
 
 
 }
