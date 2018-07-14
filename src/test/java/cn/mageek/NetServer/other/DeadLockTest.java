@@ -38,17 +38,19 @@ public class DeadLockTest {
         System.out.println(Thread.currentThread().getName()+":done");
     }
 
-    // 这个程序偶尔会产生死锁，此时用jps 配合 jstack 能看出来
+//    这个程序偶尔会产生死锁，此时用jps 配合 jstack 呢个
 
 //    Microsoft Windows [版本 10.0.17134.165]
 //            (c) 2018 Microsoft Corporation。保留所有权利。
-//      jps
+//
+//   jps
 //11984 JUnitStarter
 //9456
 //        13076 Launcher
 //13268 RemoteMavenServer
 //11864 Jps
 //
+//    jstack -l 11984
 //            2018-07-14 22:52:29
 //    Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.121-b13 mixed mode):
 //
